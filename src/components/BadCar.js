@@ -1,5 +1,5 @@
-import { categories } from "./const.js";
-const MAX_DANGER = 1;
+import { types } from "./const.js";
+const DEFAULT_COLOR = "#f17430";
 
 class BadCar extends HTMLElement {
   constructor() {
@@ -10,16 +10,18 @@ class BadCar extends HTMLElement {
   static get styles() {
     return /* css */ `
     :host {
+        --color: rgb(202 138 4);
         --width: 390px;
         --height: calc(var(--width) * 1.5); /* 550px */
         --border-size: calc(var(--width) / 19.5); /* 20px */
-        --color: rgb(202 138 4);
+        
         --dark-color: color-mix(in srgb, var(--color), black 50%);
         --category-gradient: linear-gradient(var(--dark-color), var(--color), var(--dark-color));
         --noise: url("cards/textures/noise.webp");
         --skull-icon: path("M27.16 11.03c0-5.63-4.33-10.24-11.56-10.24-7.22 0-11.2 4.61-11.2 10.24s1.59 4.91 1.59 8.09c0 1.19-1.16.61-1.16 3.18 0 2.82 3.94 2.42 5.09 3.57 1.15 1.16 1.05 3.29 1.05 3.29s.22.87.62.61c0 0 .25.61.54.25 0 0 .29.61.58.11 0 0 .29.69.76.18 0 0 .47.69 1.01.14 0 0 .61.58 1.3.14.69.43 1.3-.14 1.3-.14.54.54 1.01-.14 1.01-.14.47.51.76-.18.76-.18.29.51.58-.11.58-.11.29.36.54-.25.54-.25.4.25.61-.61.61-.61s-.11-2.13 1.05-3.29c1.16-1.15 5.09-.76 5.09-3.58 0-2.56-1.15-1.99-1.15-3.18 0-3.18 1.59-2.46 1.59-8.09zm-17 10.73c-1.94.31-2.82-.23-3.03-1.62-.55-3.62 2.78-4.21 4.44-4.01.79.1 2.17.94 2.17 1.99 0 2.82-1.77 3.36-3.58 3.65m6.67 4.69c-.36 0-.94-.47-.97-1.34-.04.87-.69 1.34-1.05 1.34-.36 0-.9-.36-.94-1.23-.04-.87 1.12-4.37 1.95-4.37.83 0 1.99 3.5 1.95 4.37s-.58 1.23-.94 1.23zm7.51-6.32c-.21 1.39-1.09 1.94-3.03 1.62-1.81-.29-3.58-.83-3.58-3.65 0-1.05 1.37-1.89 2.17-1.99 1.66-.2 5 .39 4.44 4.01z");
     }
     .card-container {
+        
         width: var(--width);
         height: var(--height);
         background-image: url("cards/textures/texture-1.webp"), linear-gradient(#141414, #141414);
@@ -201,29 +203,56 @@ class BadCar extends HTMLElement {
         position: absolute;
         bottom: calc(var(--size) * -0.6);
     }
+    .class-card {
+        position: absolute;
+        bottom: -30px;
+        left: 50%; 
+        transform: translateX(-50%); 
+        width: fit-content;
+        min-width: 100px;
+        text-align: center; 
+        color: var(--color);
+        border: 2px solid var(--color);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+    }
     `;
   }
 
   connectedCallback() {
     this.render();
+    const key = this.getAttribute("type");
+    this.style.setProperty("--color", types[key].color ?? DEFAULT_COLOR);
   }
 
-  get category() {
-    const key = this.getAttribute("category");
-    return categories[key]?.name ?? "Desconocida";
+  get type() {
+    const key = this.getAttribute("type");
+    return types[key]?.name;
   }
 
-  get categoryIcon() {
-    const category = this.getAttribute("category");
-    return /* html */`<div class="icon" style="--shape: var(--${category}-icon)"></div>`;
+  get typeClass() {
+    const key = this.getAttribute("type");
+    return types[key]?.type;
   }
 
-  get dangerIcons() {
+  get typeIcon() {
+    const type = this.getAttribute("type");
+    return /* html */`<div class="icon" style="--shape: var(--${type}-icon)"></div>`;
+  }
+
+  get typeAttribute() {
+    const key = this.getAttribute("type");
+    return types[key]?.attribute;
+  }
+
+  get dangerTypes() {
     const number = Number(this.getAttribute("start")) ?? 0;
-    return /* html */`<div class="icons" style="--shape: var(--skull-icon)">
-        <div class="number">${number}</div>
-        ${"<div class=\"icon\"></div>".repeat(MAX_DANGER)}
-    </div>`;
+    console.log({ attribute: this.typeAttribute });
+    return /* html */`
+        <div class="icons">
+            <div class="number">${number}</div>
+            <img src="${this.typeAttribute}" style="height: 30px; width: 30px;"/>
+        </div>`;
   }
 
   render() {
@@ -233,7 +262,7 @@ class BadCar extends HTMLElement {
             <header class="title">
                 <div class="text">
                     <slot name="title"></slot>
-                    ${this.dangerIcons}
+                    ${this.dangerTypes}
                 </div>
             </header>
             <div class="image-container">
@@ -242,7 +271,7 @@ class BadCar extends HTMLElement {
             <header class="description">
                 <div class="text" style="display: flex; align-items: center;
                 justify-content: space-between;">
-                    <h1>${this.category}</h1>
+                    <h1>${this.type}</h1>
                     <div class="statistics">
                         <div class="attack">
                             <p>&#9876;</p>
@@ -257,6 +286,9 @@ class BadCar extends HTMLElement {
             </header>
             <div class="description-container">
                 <slot name="description"></slot>
+            </div>
+            <div class="class-card">
+                ${this.typeClass}
             </div>
         </div>
     `;
