@@ -8,8 +8,8 @@ const colorEffect = "#f17430";
 const colorRitual = "royalblue";
 
 const attributeDark = "cards/atributos/oscuridad.png";
-const attributeLight = "cards/atributos/luz.jpeg";
-const attributeWind = "cards/atributos/viento.jpeg";
+const attributeLight = "cards/atributos/luz.png";
+const attributeWind = "cards/atributos/viento.png";
 export const types = {
   "dark-magician": {
     name: "Spellcaster",
